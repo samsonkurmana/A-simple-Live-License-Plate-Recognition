@@ -2,7 +2,7 @@
 """
 Created on Thu Mar 19 14:33:37 2020
 
-@author: dell
+@author: samson
 """
 
 import cv2
@@ -14,7 +14,6 @@ import pandas as pd
 
 currdir=os.getcwd()
 
-exemption=pd.read_csv("vehicle.csv")
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640,480))
@@ -70,7 +69,6 @@ def find_contours(dimensions, img) :
 
             img_res.append(char_copy) #List that stores the character's binary image (unsorted)
             
-    #Return characters on ascending order with respect to the x-coordinate (most-left character first)
             
     plt.show()
     #arbitrary function that stores sorted list of character indeces
@@ -109,14 +107,13 @@ def segment_characters(image) :
                        LP_WIDTH/2,
                        LP_HEIGHT/10,
                        2*LP_HEIGHT/3]
-    #plt.imshow(img_binary_lp, cmap='gray')
+   
     plt.show()
     cv2.imwrite('contour.jpg',img_binary_lp)
 
-    # Get contours within cropped license plate
-    #char_list = find_contours(dimensions, img_binary_lp)
+    
 
-#    return char_list
+
     return img_binary_lp
 
 
@@ -134,23 +131,8 @@ tess.pytesseract.tesseract_cmd =r''+currdir+'\\Tesseract-OCR\\Tesseract-OCR\\tes
 
 
 
-##########################
-
-
-
-file="L.mp4"
-
-
-
-#############################
-
-
-
-
-
 plate_cascade = cv2.CascadeClassifier('indian_license_plate.xml')
-#######if file exists filename else '0' for live capture
-cap=cv2.VideoCapture(file)
+
 
 ########## For live video capture############
 
@@ -164,31 +146,6 @@ cap.set(cv2.CAP_PROP_FPS, int(300))
 kernel = np.ones((5,5),np.uint8)
 
 
-###Connection with database
-def sqld(query):
-    quer="select name from cars where number like '%" +query+"%'"
-    #print(quer)
-    quer=quer
-    cnx = pymysql.connect(user='root', password='12345',
-                                  host='127.0.0.1',
-                                  database='parking')
-    cur = cnx.cursor()
-    cur.execute(quer) 
-        #data=cur.fetchall()
-    data=cur.fetchone()
-    return(data) 
-    
-
-
-#### Checking with the list of authorised people access numbers
-def checklis(text):
-    try:
-       return exemption.loc[exemption['Vehicle'] == str(text), 'Name'].iloc[0]
-    except IndexError:
-       pass
-            
-    
-         
         
 
 
@@ -212,22 +169,20 @@ while(cap.isOpened()):
         plate=frame[y:y+h, x:x+w]
         
         ###################
+       # if interested you can do these tasks too
         #nplate=cv2.cvtColor(plate,cv2.COLOR_BGR2GRAY)
         #opening = cv2.morphologyEx(nplate, cv2.MORPH_OPEN, kernel)
         #dilation = cv2.dilate(plate,kernel,iterations = 1)
                 
         ###################
         char=segment_characters(plate)
-#        text=tess.image_to_string(char,config="-c tessedit_char_whitelist=%s_-." % char_whitelist)
         text=tess.image_to_string(char,config="-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ --psm 6")
         font=cv2.FONT_HERSHEY_SIMPLEX
-        
         text=str(text)
-        h=checklis(text)
-        #continue
+       
        
         
-        frame=cv2.putText(frame,h,(10,50),font,1,(0,255,255),2,cv2.LINE_AA)
+        frame=cv2.putText(frame,text,(10,50),font,1,(0,255,255),2,cv2.LINE_AA)
     # Display the resulting frame
      cv2.imshow('Frame',frame)
      #cv2.imshow('plate',plate)
