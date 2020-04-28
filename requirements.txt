@@ -1,0 +1,4 @@
+openCV
+pytesseract
+numpy
+pandas
